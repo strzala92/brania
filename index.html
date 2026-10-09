@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brania Drapieżników – prognoza aktywności szczupaka, okonia i sandacza</title>
+  <meta name="description" content="Prognoza aktywności ryb drapieżnych na podstawie aktualnej pogody, ciśnienia, zachmurzenia, wiatru i faz Księżyca." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎣</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🎣</span>
+      <div>
+        <h1>Brania Drapieżników</h1>
+        <p class="subtitle">Szczupak · Okoń · Sandacz – prognoza aktywności</p>
+      </div>
+    </div>
+
+    <form id="searchForm" class="search" autocomplete="off">
+      <div class="search-box">
+        <input id="cityInput" type="search" placeholder="Szukaj miejscowości lub łowiska…" aria-label="Miejscowość" />
+        <ul id="cityResults" class="results" hidden></ul>
+      </div>
+      <button type="button" id="geoBtn" class="btn" title="Użyj mojej lokalizacji">📍 <span>Moja lokalizacja</span></button>
+      <select id="daysSelect" class="btn" aria-label="Zakres prognozy">
+        <option value="3">3 dni</option>
+        <option value="5" selected>5 dni</option>
+        <option value="7">7 dni</option>
+      </select>
+    </form>
+  </header>
+
+  <main>
+    <div id="status" class="status" hidden></div>
+
+    <section class="location-bar">
+      <h2 id="locationName">—</h2>
+      <span id="locationMeta" class="muted"></span>
+    </section>
+
+    <!-- Bieżące warunki -->
+    <section class="grid-now">
+      <div class="card weather-now">
+        <h3>Warunki teraz</h3>
+        <div id="weatherCards" class="weather-cards"></div>
+      </div>
+      <div id="speciesNow" class="species-now"></div>
+    </section>
+
+    <!-- Główny wykres aktywności -->
+    <section class="card">
+      <div class="card-head">
+        <h3>Prognoza aktywności drapieżników</h3>
+        <div class="legend-extra">
+          <span><i class="sw night"></i>noc</span>
+          <span><i class="sw major"></i>okres solunarny główny</span>
+          <span><i class="sw minor"></i>okres solunarny mniejszy</span>
+          <span><i class="sw now"></i>teraz</span>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="activityChart"></canvas></div>
+      <p class="hint">👆 Kliknij w dowolną godzinę na wykresie, aby zobaczyć, co wpływa na prognozę.</p>
+    </section>
+
+    <!-- Szczegóły wybranej godziny -->
+    <section class="card">
+      <div class="card-head">
+        <h3>Analiza czynników – <span id="detailTime">teraz</span></h3>
+        <span id="detailWeather" class="muted"></span>
+      </div>
+      <div id="factorDetail" class="factor-grid"></div>
+    </section>
+
+    <!-- Najlepsze okna -->
+    <section class="card">
+      <h3>Najlepsze okna na wędkowanie</h3>
+      <div id="bestWindows" class="windows-grid"></div>
+    </section>
+
+    <!-- Mapa cieplna dzień/godzina -->
+    <section class="card">
+      <div class="card-head">
+        <h3>Kalendarz brań (godzina po godzinie)</h3>
+        <div class="scale">
+          <span>słabo</span><i class="scale-bar"></i><span>świetnie</span>
+        </div>
+      </div>
+      <div id="heatmap" class="heatmap"></div>
+    </section>
+
+    <!-- Wykresy pogody -->
+    <section class="weather-charts">
+      <div class="card"><h3>Ciśnienie (hPa)</h3><div class="chart-wrap"><canvas id="pressureChart"></canvas></div></div>
+      <div class="card"><h3>Temperatura powietrza i szacowana temp. wody (°C)</h3><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
+      <div class="card"><h3>Zachmurzenie (%) i opady (mm)</h3><div class="chart-wrap"><canvas id="cloudChart"></canvas></div></div>
+      <div class="card"><h3>Wiatr i porywy (m/s)</h3><div class="chart-wrap"><canvas id="windChart"></canvas></div></div>
+    </section>
+
+    <section class="card about">
+      <h3>Jak to działa?</h3>
+      <div id="speciesInfo" class="species-info"></div>
+      <p class="muted small">
+        Model łączy: trend ciśnienia z ostatnich 3 h i 24 h (powolny spadek przed frontem = lepsze brania, gwałtowny wzrost po
+        froncie = gorsze), poziom ciśnienia, ilość światła pod wodą (wysokość Słońca × zachmurzenie, mgła, opady), porę świtu i
+        zmierzchu, siłę wiatru, szacowaną temperaturę wody (średnia krocząca temperatury powietrza z kilku dni), opady,
+        nagłe zmiany temperatury oraz okresy solunarne (górowanie/dołowanie oraz wschód/zachód Księżyca, wzmocnione przy nowiu i pełni).
+        To model heurystyczny oparty na wiedzy wędkarskiej – traktuj go jako wskazówkę, nie gwarancję. 🙂
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Dane pogodowe: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> ·
+    Geokodowanie: Open-Meteo / <a href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener">OSM Nominatim</a> ·
+    Wykresy: Chart.js
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/astro.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
